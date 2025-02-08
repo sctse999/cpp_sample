@@ -4,50 +4,34 @@ CXXFLAGS = -Wall -std=c++11
 
 # Directories
 SRC_DIR = src
-TEST_DIR = test
 OBJ_DIR = obj
-INCLUDE_DIR = include
+DATA_DIR = data
 
-# Source files
-SRCS = $(wildcard $(SRC_DIR)/*.cpp)
-TEST_SRCS = $(wildcard $(TEST_DIR)/*.cpp)
-OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-TEST_OBJS = $(TEST_SRCS:$(TEST_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+# Source and object files
+SRC = $(SRC_DIR)/main.cpp
+OBJ = $(OBJ_DIR)/main.o
 
-# Exclude main.o from test build
-MAIN_OBJ = $(OBJ_DIR)/main.o
-LIB_OBJS = $(filter-out $(MAIN_OBJ), $(OBJS))
+# Target
+MAIN_TARGET = main
 
-# Targets
-MAIN_TARGET = calculator
-TEST_TARGET = run_tests
+# Create necessary directories first
+all: create_dirs $(MAIN_TARGET)
 
-all: $(MAIN_TARGET)
+# Create directories
+create_dirs:
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(DATA_DIR)
 
 # Main program
-$(MAIN_TARGET): $(OBJS)
-	$(CXX) $(OBJS) -o $@
+$(MAIN_TARGET): $(OBJ)
+	$(CXX) $(OBJ) -o $@
 
-# Test program
-$(TEST_TARGET): $(TEST_OBJS) $(LIB_OBJS)
-	$(CXX) $^ -o $@
-
-# Object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
-
-$(OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
-
-$(OBJ_DIR):
-	mkdir -p $@
+# Object file
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean
 clean:
-	rm -rf $(OBJ_DIR) $(MAIN_TARGET) $(TEST_TARGET)
+	rm -rf $(OBJ_DIR) $(MAIN_TARGET)
 
-# Build and run tests
-test: $(TEST_TARGET)
-	./$(TEST_TARGET)
-
-.PHONY: all clean test 
+.PHONY: all clean create_dirs 
